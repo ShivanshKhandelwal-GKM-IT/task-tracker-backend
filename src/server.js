@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser'; 
 import { pool } from './db/db.js'; 
+import authRoutes from './routes/auth-routes.js';
+import taskRoutes from './routes/task-routes.js';
 
 dotenv.config();
 const app = express();
@@ -15,6 +17,7 @@ app.use(cors({
 })); 
 app.use(cookieParser());
 app.use('/api/auth', authRoutes);
+app.use('/api/tasks', taskRoutes);
 
 app.get('/', async (req, res) => {
   try {
