@@ -27,7 +27,7 @@ describe('GET / API', () => {
   it('should handle database errors', async () => {
     pool.query.mockRejectedValue(new Error('DB Fail'));
     const res = await request(app).get('/');
-    expect(res.statusCode).toEqual(500);
+    expect(res.statusCode).toEqual(503);
     expect(res.text).toEqual('Database connection failed');
   });
 });

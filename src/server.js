@@ -16,14 +16,12 @@ app.get('/', async (req, res) => {
     const result = await pool.query('SELECT NOW()'); 
     res.send(`API is running. DB Time: ${result.rows[0].now}`);
   } catch (err) {
-    res.status(500).send('Database connection failed');
+    res.status(503).send('Database connection failed');
   }
 });
 
-if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
-}
 
 export { app };
