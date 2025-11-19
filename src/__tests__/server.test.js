@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { jest } from '@jest/globals';
+import http from 'http';
 
 jest.unstable_mockModule('../db/db.js', () => ({
   pool: {
@@ -8,10 +9,25 @@ jest.unstable_mockModule('../db/db.js', () => ({
   },
 }));
 
+jest.unstable_mockModule('../routes/auth-routes.js', () => ({
+  default: (req, res, next) => next(),
+}));
+
+const listenSpy = jest.spyOn(http.Server.prototype, 'listen')
+  .mockImplementation(() => {
+    return {};
+  });
+
 const { app } = await import('../server.js');
 const { pool } = await import('../db/db.js');
 
+listenSpy.mockRestore();
+
 describe('GET / API', () => {
+
+  afterAll(async () => {
+    pool.end();
+  });
   
   afterEach(() => {
     jest.clearAllMocks();
