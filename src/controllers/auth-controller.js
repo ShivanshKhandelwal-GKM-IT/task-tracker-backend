@@ -68,7 +68,7 @@ export function logout(req, res) {
   res.cookie('token', '', { 
     httpOnly: true, 
     secure: process.env.NODE_ENV === 'production', 
-    sameSite: 'strict',
+    sameSite: 'none',
     expires: new Date(0)
   });
   res.json({ message: "Logged out successfully" });
