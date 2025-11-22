@@ -1,0 +1,50 @@
+name: Deploy to EC2 
+
+on:
+  push:
+    branches:
+      - feat/task
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Scan dependencies for vulnerabilities with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          security-checks: 'vuln,config,secret'
+          path: .
+          format: 'table'
+          exit-code: '1' 
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            echo "---- Navigating to project folder ----"
+            cd /home/ubuntu/task-tracker-backend
+            
+            echo "---- Pulling latest changes ----"
+            git fetch --all
+            
+            git checkout feat/task
+
+            echo "---- Resetting to match feat/task ----"
+            git reset --hard origin/feat/task
+            
+            echo "---- Installing dependencies ----"
+            npm install
+            
+            echo "---- Restarting server ----"
+            pm2 restart all
+            
+            echo "---- Deployment Completed Successfully ----"
+          EOF
