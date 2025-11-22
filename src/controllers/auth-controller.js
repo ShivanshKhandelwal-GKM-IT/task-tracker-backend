@@ -1,8 +1,8 @@
 import * as authService from "../services/auth-service.js";
+import validator from "validator";
 
 function isValidEmail(email) {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return emailRegex.test(email);
+  return validator.isEmail(email);
 }
 
 function setAuthCookie(res, token) {
@@ -17,18 +17,17 @@ function setAuthCookie(res, token) {
 export async function register(req, res) {
   try {
     const { email, password, name } = req.body;
-    
+
     if (!isValidEmail(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
     
     const { user, token } = await authService.registerUser(email, password, name);
-    
+
     setAuthCookie(res, token);
     
     res.status(201).json({ user });
   } catch (error) {
-    
     if (error.message === "Email already exists") {
       return res.status(400).json({ message: error.message });
     }
@@ -40,18 +39,17 @@ export async function register(req, res) {
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
-    
+
     if (!isValidEmail(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
-    
+
     const { user, token } = await authService.loginUser(email, password);
-    
+
     setAuthCookie(res, token);
-    
+
     res.json({ user });
   } catch (error) {
-    
     if (error.message === "Invalid credentials") {
       return res.status(400).json({ message: error.message });
     }
@@ -65,9 +63,9 @@ export function me(req, res) {
 }
 
 export function logout(req, res) {
-  res.cookie('token', '', { 
-    httpOnly: true, 
-    secure: process.env.NODE_ENV === 'production', 
+  res.cookie('token', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'none',
     expires: new Date(0)
   });
